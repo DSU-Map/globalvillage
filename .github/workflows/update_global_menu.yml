@@ -1,7 +1,7 @@
 name: Update global_menu.json
 
 on:
-  workflow_dispatch:    # 버튼 눌러서 수동 실행용
+  workflow_dispatch:    # 수동 실행용
 
 jobs:
   update-menu:
@@ -26,14 +26,17 @@ jobs:
 
       - name: Commit and push global_menu.json
         run: |
-          if git diff --quiet; then
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 새로 생성된 파일도 포함해서 스테이징
+          git add global_menu.json || true
+
+          # 스테이징된 변경이 없으면 커밋 안 함
+          if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add global_menu.json
           git commit -m "Update global_menu.json"
           git push
