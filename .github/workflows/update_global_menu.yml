@@ -1,7 +1,12 @@
 name: Update global_menu.json
 
 on:
-  workflow_dispatch:    # 수동 실행용
+  workflow_dispatch:         # 수동 실행도 가능
+  schedule:                  # 매일 KST 새벽 4시
+    - cron: "0 19 * * *"     # 매일 19:00 UTC = KST 다음날 04:00
+
+permissions:
+  contents: write            # push 하려면 필요
 
 jobs:
   update-menu:
@@ -24,13 +29,13 @@ jobs:
         run: |
           python save_global_menu.py
 
-      - name: Commit and push global_menu.json
+      - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # 새로 생성된 파일도 포함해서 스테이징
-          git add global_menu.json || true
+          # 메뉴 JSON + 상태 JSON 둘 다 스테이징
+          git add global_menu.json menu_update_state.json || true
 
           # 스테이징된 변경이 없으면 커밋 안 함
           if git diff --cached --quiet; then
@@ -38,5 +43,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Update global_menu.json"
+          git commit -m "Update global_menu.json (auto)"
           git push
